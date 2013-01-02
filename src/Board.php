@@ -13,13 +13,29 @@ class Board {
 		$this->rows = $rows;
 	}
 
-	public function getWidth() {
-		return $this->cols;
-	}
+    public function getWidth() {
+        return $this->cols;
+    }
+
+    public function getLeftColumn() {
+        return 0;
+    }
+
+    public function getRightColumn() {
+        return $this->cols - 1;
+    }
 
 	public function getHeight() {
 		return $this->rows;
 	}
+    
+    public function getTopRow() {
+        return $this->rows - 1;
+    }
+    
+    public function getBottomRow() {
+        return 0;
+    }
 
 	public function positionIsEmpty($pos) {
 		try {

@@ -44,10 +44,37 @@ class BoardTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @expectedException InvalidPositionException
 	 */
-	public function testCounterOffBoard() {
+	public function testCounterOffLeftOfBoard() {
 		$this->board->placeCounter(new Counter('X'), -1);
+    }    
+    
+    /**
+     * @expectedException InvalidPositionException
+     */
+    public function testCounterOffRightOfBoard() {
 		$this->board->placeCounter(new Counter('X'), 9);
 	}
+    
+    /**
+     * @expectedException InvalidPositionException
+     */
+    public function testCounterOffLeftOfZeroSizeBoard() {
+        $board = new Board(0, 0);
+        $board->placeCounter(new Counter('X'), 0);
+    }
+    
+    public function testBoardHeight(){
+        $this->assertEquals(5, $this->board->getHeight());        
+        $this->assertEquals(0, $this->board->getBottomRow());     
+        $this->assertEquals(4, $this->board->getTopRow());
+    }
+    
+    public function testBoardWidth(){
+        $this->assertEquals(6, $this->board->getWidth());        
+        $this->assertEquals(0, $this->board->getLeftColumn());     
+        $this->assertEquals(5, $this->board->getRightColumn());
+        
+    }
 
 }
 ?>
