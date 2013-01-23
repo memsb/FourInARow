@@ -1,48 +1,29 @@
 <?php
 
 require_once "Position.php";
+require_once "Exceptions.php";
 
 class Board {
 
 	private $cols = 0;
 	private $rows = 0;
 	private $cells;
+	private $lastPosition;
 
 	function __construct($cols, $rows) {
+		if ($cols < 1 || $rows < 1) {
+			throw new InvalidBoardSizeException('Board width or height cannot be zero or less');
+		}
 		$this->cols = $cols;
 		$this->rows = $rows;
 	}
-
-    public function getWidth() {
-        return $this->cols;
-    }
-
-    public function getLeftColumn() {
-        return 0;
-    }
-
-    public function getRightColumn() {
-        return $this->cols - 1;
-    }
-
-	public function getHeight() {
-		return $this->rows;
+	
+	public function getLastPosition(){
+		return $this->lastPosition;
 	}
-    
-    public function getTopRow() {
-        return $this->rows - 1;
-    }
-    
-    public function getBottomRow() {
-        return 0;
-    }
 
 	public function positionIsEmpty($pos) {
-		try {
-			return $this->isCellEmpty($this->getCell($pos));
-		} catch(Exception $e) {
-			return true;
-		}
+		return $this->isCellEmpty($this->getCell($pos));
 	}
 
 	public function isCellEmpty($cell) {
@@ -50,37 +31,107 @@ class Board {
 	}
 
 	public function getCell($pos) {
-		return $this->cells[$pos->col][$pos->row];
+		if(isset($this->cells[$pos->col][$pos->row])){
+			return $this->cells[$pos->col][$pos->row];
+		}
+		return null;
+	}
+
+	public function isFull() {
+		foreach (range(0, $this->getRightColumn()) AS $col) {
+			if ($this->columnIsNotFull($col)) {
+				return False;
+			}
+		}
+		return True;
+	}
+
+	protected function columnIsNotFull($col) {
+		return $this->positionIsEmpty(new Position($col, $this->getTopRow()));
 	}
 
 	public function columnIsFull($col) {
-		for ($row = 0; $row < $this->rows; $row++) {
-			if ($this->positionIsEmpty(new Position($col, $row))) {
-				return false;
-			}
-		}
-		return true;
+		return !$this->columnIsNotFull($col);
 	}
 
 	public function placeCounter($counter, $col) {
 		if ($this->isInvalidPosition($col)) {
-			throw new InvalidPositionException("{$col} is outside of acceptable position range 0 to {$this->cols}");
+			throw new InvalidPositionException("{$col} is outside of acceptable position range {$this->getLeftColumn()} to {$this->getRightColumn()}");
 		}
-		for ($row = 0; $row < $this->rows; $row++) {
+		foreach ($this->getRowsFromBottomUp() AS $row) {
 			$pos = new Position($col, $row);
 			if ($this->positionIsEmpty($pos)) {
 				$this->cells[$pos->col][$pos->row] = $counter;
+				$this->lastPosition = $pos;
 				return;
 			}
 		}
 	}
 
+	public function getRowsFromTopDown() {
+		return range($this->getTopRow(), $this->getBottomRow());
+	}
+
+	public function getRowsFromBottomUp() {
+		return range($this->getBottomRow(), $this->getTopRow());
+	}
+
+	public function getColumnsFromLeftToRight() {
+		return range($this->getLeftColumn(), $this->getRightColumn());
+	}
+
+	public function getColumnsFromRightToLeft() {
+		return range($this->getRightColumn(), $this->getLeftColumn());
+	}
+	
+	public function getWidth() {
+		return $this->cols;
+	}
+
+	public function getLeftColumn() {
+		return 0;
+	}
+
+	public function getRightColumn() {
+		return $this->cols - 1;
+	}
+
+	public function getHeight() {
+		return $this->rows;
+	}
+
+	public function getTopRow() {
+		return $this->rows - 1;
+	}
+
+	public function getBottomRow() {
+		return 0;
+	}
+
 	protected function isInvalidPosition($col) {
-		return ! $this->isValidPosition($col);
+		return !$this->isValidPosition($col);
 	}
 
 	protected function isValidPosition($col) {
-		return $col >= 0 && $col < $this->cols;
+		return $col >= $this->getLeftColumn() && $col <= $this->getRightColumn();
+	}
+
+	public function __toString() {		
+		$string = PHP_EOL;
+		foreach ($this->getRowsFromTopDown() AS $row) {
+			foreach ($this->getColumnsFromLeftToRight() AS $col) {
+				$pos = new Position($col, $row);
+				if($this->positionIsEmpty($pos)){
+					$char = ' ';
+				}else{
+					$counter = $this->getCell($pos);
+					$char = $counter->char;					
+				}
+				$string .= $char;
+			}
+			$string .= PHP_EOL;
+		}
+		return $string;
 	}
 
 }

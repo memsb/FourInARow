@@ -2,9 +2,7 @@
 
 interface BoardPrinter {
 
-    public function __construct(Board $board);
-
-    public function draw();
+    public function draw(Board $board);
 
 }
 ?>

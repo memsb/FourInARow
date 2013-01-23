@@ -2,29 +2,48 @@
 
 require_once "Board.php";
 require_once "BoardPrinter.php";
+require_once "Observer.php";
 
-class SimpleBoardPrinter implements BoardPrinter {
+class SimpleBoardPrinter implements BoardPrinter, Observer {
 
     protected $board;
 
     protected $verticalDivider = '|';
     protected $emptySpace = '_';
 
-    public function __construct(Board $board) {
-        $this->board = $board;
+    public function __construct(){
     }
-
-    public function draw() {
-        $output = '';
-        for ($row = $this->board->getTopRow(); $row >= $this->board->getBottomRow(); $row--) {
+	
+	public function notify($game){
+		echo $this->draw($game->getBoard());
+		echo $game->getMessage() . PHP_EOL;
+	}
+	
+    public function draw(Board $board) {
+    	$this->board = $board;
+        $output = $this->drawTopRow();
+        foreach($this->board->getRowsFromTopDown() AS $row) {
             $output .= $this->drawRow($row);
         }
         return $output;
     }
+	
+	protected function drawTopRow(){
+		$output = '';
+		foreach ($this->board->getColumnsFromLeftToRight() AS $col) {
+			$output .= $this->drawPositionIndicator($col);
+		}		
+        $output .= $this->verticalDivider . PHP_EOL;
+		return $output;
+	}
+	
+	protected function drawPositionIndicator($num){
+		return $this->verticalDivider . $num;
+	}
 
     protected function drawRow($row) {
         $output = '';
-        for ($col = $this->board->getLeftColumn(); $col <= $this->board->getRightColumn(); $col++) {
+        foreach ($this->board->getColumnsFromLeftToRight() AS $col) {
             $pos = new Position($col, $row);
             $output .= $this->drawCell($pos);
         }

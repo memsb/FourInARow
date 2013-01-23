@@ -1,16 +1,35 @@
 <?php
 
 require_once dirname(dirname(__FILE__)) . "/src/Board.php";
-require_once dirname(dirname(__FILE__)) . "/src/Exceptions.php";
 require_once dirname(dirname(__FILE__)) . "/src/Counter.php";
-require_once dirname(dirname(__FILE__)) . "/src/Position.php";
 
 class BoardTest extends PHPUnit_Framework_TestCase {
 
 	protected $board;
 
 	protected function setup() {
-		$this->board = new Board(6, 5);
+		$this->board = new Board(2, 2);
+	}
+	
+	/**
+	 * @expectedException InvalidBoardSizeException
+	 */
+	public function testCannotCreateZeroSizeboard() {
+		$board = new Board(0, 0);
+	}	
+
+	public function testPlacingACounter() {
+		$this->board->placeCounter(new Counter('X'), 0);
+		$this->assertNotNull($this->board->getCell(new Position(0, 0)));
+		$this->board->placeCounter(new Counter('X'), 0);
+		$this->assertNotNull($this->board->getCell(new Position(0, 1)));
+	}
+
+	public function testGetLastPosition() {
+		$this->board->placeCounter(new Counter('X'), 0);
+		$this->assertEquals(new Position(0, 0), $this->board->getLastPosition());
+		$this->board->placeCounter(new Counter('X'), 0);
+		$this->assertEquals(new Position(0, 1), $this->board->getLastPosition());
 	}
 
 	public function testBoardSpaceIsEmpty() {
@@ -26,13 +45,17 @@ class BoardTest extends PHPUnit_Framework_TestCase {
 
 	public function testColumnIsNotFull() {
 		$this->assertFalse($this->board->columnIsFull(0));
-
 		$this->board->placeCounter(new Counter('X'), 0);
-		$this->board->placeCounter(new Counter('X'), 0);
-		$this->board->placeCounter(new Counter('X'), 0);
-		$this->board->placeCounter(new Counter('X'), 0);
+		$this->assertFalse($this->board->columnIsFull(0));
 		$this->board->placeCounter(new Counter('X'), 0);
 		$this->assertTrue($this->board->columnIsFull(0));
+	}
+
+	public function testBoardIsFull() {
+		$smallBoard = new Board(1, 1);
+		$this->assertFalse($smallBoard->isFull());
+		$smallBoard->placeCounter(new Counter('X'), 0);
+		$this->assertTrue($smallBoard->isFull());
 	}
 
 	public function testCounterEquality() {
@@ -46,35 +69,31 @@ class BoardTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testCounterOffLeftOfBoard() {
 		$this->board->placeCounter(new Counter('X'), -1);
-    }    
-    
-    /**
-     * @expectedException InvalidPositionException
-     */
-    public function testCounterOffRightOfBoard() {
+	}
+
+	/**
+	 * @expectedException InvalidPositionException
+	 */
+	public function testCounterOffRightOfBoard() {
 		$this->board->placeCounter(new Counter('X'), 9);
 	}
-    
-    /**
-     * @expectedException InvalidPositionException
-     */
-    public function testCounterOffLeftOfZeroSizeBoard() {
-        $board = new Board(0, 0);
-        $board->placeCounter(new Counter('X'), 0);
-    }
-    
-    public function testBoardHeight(){
-        $this->assertEquals(5, $this->board->getHeight());        
-        $this->assertEquals(0, $this->board->getBottomRow());     
-        $this->assertEquals(4, $this->board->getTopRow());
-    }
-    
-    public function testBoardWidth(){
-        $this->assertEquals(6, $this->board->getWidth());        
-        $this->assertEquals(0, $this->board->getLeftColumn());     
-        $this->assertEquals(5, $this->board->getRightColumn());
-        
-    }
+
+
+	public function testBoardHeight() {
+		$this->assertEquals(2, $this->board->getHeight());
+		$this->assertEquals(0, $this->board->getBottomRow());
+		$this->assertEquals(1, $this->board->getTopRow());
+		$this->assertEquals(array(1, 0), $this->board->getRowsFromTopDown());		
+		$this->assertEquals(array(0, 1), $this->board->getRowsFromBottomUp());
+	}
+
+	public function testBoardWidth() {
+		$this->assertEquals(2, $this->board->getWidth());
+		$this->assertEquals(0, $this->board->getLeftColumn());
+		$this->assertEquals(1, $this->board->getRightColumn());
+		$this->assertEquals(array(0, 1), $this->board->getColumnsFromLeftToRight());
+		$this->assertEquals(array(1, 0), $this->board->getColumnsFromRightToLeft());
+	}
 
 }
 ?>

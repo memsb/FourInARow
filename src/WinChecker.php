@@ -1,14 +1,21 @@
 <?php
 
+require_once 'Position.php';
+require_once 'Board.php';
+
 class WinChecker {
 	
 	private $inARow = 0;
 	private $board;
 
-	function __construct($board, $inARow = 4) {
+	function __construct(Board $board, $inARow = 4) {
 		$this->board = $board;
 		$this->inARow = $inARow;
 	}	
+	
+	public function hasWin(Position $pos){
+		return $this->hasWinInColumn($pos->col) OR $this->hasWinInRow($pos->row) OR $this->hasWinInDiagonal($pos);
+	}
 	
 	public function hasWinInColumn($col){
 		$cells = array();
