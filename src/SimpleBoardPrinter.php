@@ -2,25 +2,21 @@
 
 require_once "Board.php";
 require_once "BoardPrinter.php";
-require_once "Observer.php";
 
-class SimpleBoardPrinter implements BoardPrinter, Observer {
+class SimpleBoardPrinter implements BoardPrinter {
 
     protected $board;
 
     protected $verticalDivider = '|';
     protected $emptySpace = '_';
-
-    public function __construct(){
-    }
 	
 	public function notify($game){
-		echo $this->draw($game->getBoard());
+		$this->board = $game->getBoard();
+		echo $this->draw();
 		echo $game->getMessage() . PHP_EOL;
 	}
 	
-    public function draw(Board $board) {
-    	$this->board = $board;
+    public function draw() {    	
         $output = $this->drawTopRow();
         foreach($this->board->getRowsFromTopDown() AS $row) {
             $output .= $this->drawRow($row);
@@ -31,14 +27,18 @@ class SimpleBoardPrinter implements BoardPrinter, Observer {
 	protected function drawTopRow(){
 		$output = '';
 		foreach ($this->board->getColumnsFromLeftToRight() AS $col) {
-			$output .= $this->drawPositionIndicator($col);
+			$label = $col;
+			if( $this->board->columnIsFull($col)){
+				$label = ' ';
+			}
+			$output .= $this->drawPositionIndicator($label);			
 		}		
         $output .= $this->verticalDivider . PHP_EOL;
 		return $output;
 	}
 	
-	protected function drawPositionIndicator($num){
-		return $this->verticalDivider . $num;
+	protected function drawPositionIndicator($label){
+		return $this->verticalDivider . $label;
 	}
 
     protected function drawRow($row) {

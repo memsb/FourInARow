@@ -5,112 +5,98 @@ require_once dirname(dirname(__FILE__)) . "/src/WinChecker.php";
 
 class WinCheckerTest extends PHPUnit_Framework_TestCase {
 
-	protected $board;
-	protected $checker;
+	protected $cols = 6;
+	protected $rows = 5;
 
-	protected function setup() {
-		$this->board = new Board(6, 5);
-		$this->checker = new WinChecker($this->board, 4);
+	public function testWinningColumn() {				
+		$checker = new WinChecker($this->getMockBoardWithCounters(4, $this->getMockEqualCounter()), 4);
+		$this->assertTrue($checker->hasWinInColumn(0));
 	}
-
-	public function testWinningColumn() {
-		$col = 0;
-		$counter = new Counter('X');
-		$this->board->placeCounter($counter, $col);
-		$this->board->placeCounter($counter, $col);
-		$this->board->placeCounter($counter, $col);
-		$this->assertFalse($this->checker->hasWinInColumn($col));
-		$this->board = $this->fillColumn($col, $this->board, $counter);
-		$this->assertTrue($this->checker->hasWinInColumn($col));
+	
+	public function testNonWinningcolumn(){
+		$checker = new WinChecker($this->getMockBoardWithCounters(0, $this->getMockEqualCounter()), 4);
+		$this->assertFalse($checker->hasWinInColumn(0));
+		$checker = new WinChecker($this->getMockBoardWithCounters(3, $this->getMockEqualCounter()), 4);
+		$this->assertFalse($checker->hasWinInColumn(0));
+		$checker = new WinChecker($this->getMockBoardWithCounters(5, $this->getMockUnequalCounter()), 4);
+		$this->assertFalse($checker->hasWinInColumn(0));
 	}
-
-	public function testWinningRow() {
-		$counter = new Counter('X');
-		$this->board->placeCounter($counter, 0);
-		$this->board->placeCounter($counter, 1);
-		$this->board->placeCounter($counter, 2);
-		$this->assertFalse($this->checker->hasWinInRow(0));
-		$this->board = $this->PlaceCounterInEachColumn($this->board, $counter);
-		$this->assertTrue($this->checker->hasWinInRow(0));
+	
+	public function testWinningRow() {		
+		$checker = new WinChecker($this->getMockBoardWithCounters(4, $this->getMockEqualCounter()), 4);
+		$this->assertTrue($checker->hasWinInRow(0));
 	}
-
+	
+	public function testNonWinningRow(){
+		$checker = new WinChecker($this->getMockBoardWithCounters(0, $this->getMockEqualCounter()), 4);
+		$this->assertFalse($checker->hasWinInRow(0));
+		$checker = new WinChecker($this->getMockBoardWithCounters(3, $this->getMockEqualCounter()), 4);
+		$this->assertFalse($checker->hasWinInRow(0));
+		$checker = new WinChecker($this->getMockBoardWithCounters(5, $this->getMockUnequalCounter()), 4);
+		$this->assertFalse($checker->hasWinInRow(0));
+	}
+	
 	public function testWinningDiagonal() {
-		$pos = new Position(2, 2);
-		$this->assertFalse($this->checker->hasWinInDiagonal($pos));
-		$this->board = $this->fillBoard($this->board, new Counter('X'));
-		$this->assertTrue($this->checker->hasWinInDiagonal($pos));
+		$pos = new Position(0, 0);
+		$checker = new WinChecker($this->getMockBoardWithCounters(0, $this->getMockEqualCounter()), 4);
+		$this->assertFalse($checker->hasWinInDiagonal($pos));
+		$checker = new WinChecker($this->getMockBoardWithCounters(3, $this->getMockEqualCounter()), 4);
+		$this->assertFalse($checker->hasWinInDiagonal($pos));
+		$checker = new WinChecker($this->getMockBoardWithCounters(4, $this->getMockUnequalCounter()), 4);
+		$this->assertFalse($checker->hasWinInDiagonal($pos));
 	}
-
+	
+	public function testWinningCheckForAnyTypeOfWin() {
+		$pos = new Position(0, 0);
+		$checker = new WinChecker($this->getMockBoardWithCounters(0, $this->getMockEqualCounter()), 4);
+		$this->assertFalse($checker->hasWin($pos));
+		$checker = new WinChecker($this->getMockBoardWithCounters(3, $this->getMockEqualCounter()), 4);
+		$this->assertFalse($checker->hasWin($pos));
+		$checker = new WinChecker($this->getMockBoardWithCounters(4, $this->getMockUnequalCounter()), 4);
+		$this->assertFalse($checker->hasWin($pos));
+	}
+	
+	public function testNonWinningCheckForAnyTypeOfWin() {
+		$pos = new Position(0, 0);
+		$checker = new WinChecker($this->getMockBoardWithCounters(0, $this->getMockEqualCounter()), 4);
+		$this->assertFalse($checker->hasWin($pos));
+		$checker = new WinChecker($this->getMockBoardWithCounters(3, $this->getMockEqualCounter()), 4);
+		$this->assertFalse($checker->hasWin($pos));
+		$checker = new WinChecker($this->getMockBoardWithCounters(4, $this->getMockUnequalCounter()), 4);
+		$this->assertFalse($checker->hasWin($pos));
+	}
+	
 	public function testHasWin() {
 		$pos = new Position(0, 0);
-		$this->winningColumn($pos);
-		$this->winningRow($pos);
-		$this->winningDiagonal($pos);
-	}
-
-	protected function winningColumn($pos) {
-		$board = new Board(6, 5);
-		$checker = new WinChecker($board, 4);
-		$this->assertFalse($checker->hasWin($pos));
-		$this->fillColumn($pos->col, $board, new Counter('X'));
+		$checker = new WinChecker($this->getMockBoardWithCounters(4, $this->getMockEqualCounter()), 4);
 		$this->assertTrue($checker->hasWin($pos));
 	}
-
-	protected function winningRow($pos) {
-		$board = new Board(6, 5);
-		$checker = new WinChecker($board, 4);
-		$this->assertFalse($checker->hasWin($pos));
-		$this->PlaceCounterInEachColumn($board, new Counter('X'));
-		$this->assertTrue($checker->hasWin($pos));
-	}
-
-	protected function winningDiagonal($pos) {
-		$o = new Counter('O');
-		$x = new Counter('X');
-		$board = new Board(6, 5);
-		
-		$checker = new WinChecker($board, 4);		
-		$this->assertFalse($checker->hasWin($pos));
-		
-		$board->placeCounter($x, 0);
-		
-		$board->placeCounter($o, 1);
-		$board->placeCounter($x, 1);
-		
-		$board->placeCounter($o, 2);
-		$board->placeCounter($o, 2);
-		$board->placeCounter($x, 2);
-		
-		$board->placeCounter($o, 3);
-		$board->placeCounter($o, 3);
-		$board->placeCounter($o, 3);
-		$board->placeCounter($x, 3);
-		
-		$this->assertTrue($checker->hasWin($pos));
-	}
-
-	protected function PlaceCounterInEachColumn(Board $board, Counter $counter) {
-		foreach ($board->getColumnsFromLeftToRight() as $col) {
-			$board->placeCounter($counter, $col);
+	
+	protected function getMockBoardWithCounters($numOfCounters, $counter){
+		$board = $this->getMock('Board', array('getCell'), array($this->cols, $this->rows));
+		for($i = 0; $i < $numOfCounters; $i++){
+			$board->expects($this->at($i))
+						->method('getCell')
+					 	->will($this->returnValue($counter));
 		}
 		return $board;
 	}
-
-	protected function fillColumn($col, Board $board, Counter $counter) {
-		foreach ($board->getRowsFromTopDown() as $row) {
-			$board->placeCounter($counter, $col);
-		}
-		return $board;
+	
+	protected function getMockEqualCounter(){
+		$counter = $this->getMock('Counter', array(), array('X'));
+		$counter->expects($this->any())
+					->method('equals')
+				 	->will($this->returnValue(True));
+		return $counter;
+	}	
+	
+	protected function getMockUnequalCounter(){
+		$counter = $this->getMock('Counter', array(), array('X'));
+		$counter->expects($this->any())
+					->method('equals')
+				 	->will($this->returnValue(False));
+		return $counter;
 	}
-
-	protected function fillBoard(Board $board, Counter $counter) {
-		foreach ($board->getColumnsFromLeftToRight() as $col) {
-			$this->fillColumn($col, $board, $counter);
-		}
-		return $board;
-	}
-
 }
-?>
 
 ?>

@@ -58,6 +58,9 @@ class Board {
 		if ($this->isInvalidPosition($col)) {
 			throw new InvalidPositionException("{$col} is outside of acceptable position range {$this->getLeftColumn()} to {$this->getRightColumn()}");
 		}
+		if($this->columnIsFull($col)){
+			throw new InvalidPositionException("{$col} is full, please try another position.");
+		}
 		foreach ($this->getRowsFromBottomUp() AS $row) {
 			$pos = new Position($col, $row);
 			if ($this->positionIsEmpty($pos)) {
@@ -121,11 +124,11 @@ class Board {
 		foreach ($this->getRowsFromTopDown() AS $row) {
 			foreach ($this->getColumnsFromLeftToRight() AS $col) {
 				$pos = new Position($col, $row);
-				if($this->positionIsEmpty($pos)){
-					$char = ' ';
-				}else{
+				try{
 					$counter = $this->getCell($pos);
 					$char = $counter->char;					
+				}catch(NoCounterException $e){
+					$char = ' ';
 				}
 				$string .= $char;
 			}

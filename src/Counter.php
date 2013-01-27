@@ -9,7 +9,7 @@ class Counter {
 	}
 	
 	public function equals(Counter $c){
-		return $this->char == $c->char;
+		return strcmp($this->char, $c->char) == 0;
 	}
 }
 ?>

@@ -86,11 +86,11 @@ class WinChecker {
 	public function checkPositionsForWin($cells){
 		$last = null;
 		$found = 0;
-		foreach($cells as $current){
+		foreach($cells as $current){			
 			if( $this->board->isCellEmpty($current) ){
 				$last = null;
 				$found = 0;
-			}else{			
+			}else{
 				if( $last !== null && $current->equals($last) ){
 					$found++;
 					if( $found >= $this->inARow ){

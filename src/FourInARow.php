@@ -10,7 +10,7 @@ class FourInARow {
 	
 	protected $cols = 6;
 	protected $rows = 5;
-	protected $inARow = 5;
+	protected $inARow = 4;
 	
 	protected $board;
 	protected $checker;
@@ -22,8 +22,8 @@ class FourInARow {
 		$checker = new WinChecker($board, $this->inARow);
 		
 		$this->game = new Game($board, $checker);
-		$this->game->addPlayer(new Player('Player 1', new Counter('X')));
-		$this->game->addPlayer(new Player('Player 2', new Counter('O')));
+		$this->game->addPlayer(new Player('Dave', new Counter('X')));
+		$this->game->addPlayer(new Player('Mike', new Counter('O')));
 		$this->game->addObserver(new SimpleBoardPrinter());
 		
 		$this->inputReader = new CliReader();
@@ -32,9 +32,18 @@ class FourInARow {
 	
 	public function play(){
 		$this->game->start();
-		while( ! $this->game->hasWinner() ){
-			$player = $this->game->getCurrentPlayer();
-			$this->inputReader->read($player->getName());
+		$this->gameLoop();		
+	}
+	
+	protected function gameLoop(){
+		try{
+			while( true ){
+				$player = $this->game->getCurrentPlayer();
+				$this->inputReader->read($player->getName());
+			}
+		}catch(ExitSignalException $e){
+			echo $e->getMessage() . PHP_EOL;
+		}catch(GameOverException $e){
 		}
 	}
 }

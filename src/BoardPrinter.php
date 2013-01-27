@@ -1,8 +1,9 @@
 <?php
+require_once "Observer.php";
 
-interface BoardPrinter {
+interface BoardPrinter extends Observer {
 
-    public function draw(Board $board);
+    public function draw();
 
 }
 ?>

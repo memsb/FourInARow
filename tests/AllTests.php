@@ -6,17 +6,18 @@ require_once 'GameTest.php';
 require_once 'SimpleBoardPrinterTest.php';
 require_once 'WinCheckerTest.php';
 require_once 'CliReaderTest.php';
+require_once 'CounterTest.php';
 
 class AllTests {
 	public static function suite() {		
-		$suite = new PHPUnit_Framework_TestSuite('PHPUnit');
-
-		$suite->addTestSuite('BoardTest');
+		$suite = new PHPUnit_Framework_TestSuite('PHPUnit');		
 		$suite->addTestSuite('PlayerTest');
-		//$suite->addTestSuite('GameTest');
+		$suite->addTestSuite('CounterTest');		
+		$suite->addTestSuite('CliReaderTest');
+		$suite->addTestSuite('BoardTest');
 		$suite->addTestSuite('SimpleBoardPrinterTest');
 		$suite->addTestSuite('WinCheckerTest');
-		$suite->addTestSuite('CliReaderTest');
+		$suite->addTestSuite('GameTest');
 		return $suite;
 	}
 

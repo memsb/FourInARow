@@ -1,10 +1,12 @@
 <?php
 
 require_once "Observable.php";
+require_once "Exceptions.php";
 
 class CliReader implements Observable {
 
 	protected $observers = array();
+	protected $exitChar = 'x';
 	
 	public function addObserver(Observer $observer){
 		$this->observers[] = $observer;
@@ -16,6 +18,10 @@ class CliReader implements Observable {
 		}
 	}
 	
+	public function setExitCharacter($char){
+		$this->exitChar = $char;
+	}
+	
 	public function formatAsInt($data){
 		return intval($data);
 	}
@@ -24,11 +30,25 @@ class CliReader implements Observable {
 		return "{$name}s move: ";
 	}
 	
-	public function read($playerNumber){
-		echo $this->prompt($playerNumber) . PHP_EOL;
-		$input = fread(STDIN, 10);
-		$int = $this->formatAsInt($input);
-		$this->notifyObservers($int);
+	public function read($playerName){
+		echo $this->prompt($playerName) . PHP_EOL;
+		$input = $this->getInputString();
+		if( strlen($input) > 0 ){
+			$int = $this->formatAsInt($input);
+			$this->notifyObservers($int);
+		}
+	}
+	
+	protected function getInputString(){
+		$input = $this->readFromCli();
+		if(strcmp($input, $this->exitChar) == 0){
+			throw new ExitSignalException("Exiting.");
+		}
+		return $input;
+	}
+	
+	protected function readFromCli(){
+		return trim(fread(STDIN, 4));
 	}
 }
 

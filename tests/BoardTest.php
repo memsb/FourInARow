@@ -6,9 +6,11 @@ require_once dirname(dirname(__FILE__)) . "/src/Counter.php";
 class BoardTest extends PHPUnit_Framework_TestCase {
 
 	protected $board;
+	protected $counter;
 
 	protected function setup() {
 		$this->board = new Board(2, 2);
+		$this->counter = $this->getMock('Counter', array(), array(null));
 	}
 	
 	/**
@@ -19,63 +21,62 @@ class BoardTest extends PHPUnit_Framework_TestCase {
 	}	
 
 	public function testPlacingACounter() {
-		$this->board->placeCounter(new Counter('X'), 0);
-		$this->assertNotNull($this->board->getCell(new Position(0, 0)));
-		$this->board->placeCounter(new Counter('X'), 0);
-		$this->assertNotNull($this->board->getCell(new Position(0, 1)));
+		$col = 0;
+		$this->board->placeCounter($this->counter, $col);
+		$this->assertNotNull($this->board->getCell(new Position($col, 0)));
+		$this->board->placeCounter($this->counter, $col);
+		$this->assertNotNull($this->board->getCell(new Position($col, 1)));
 	}
 
 	public function testGetLastPosition() {
-		$this->board->placeCounter(new Counter('X'), 0);
-		$this->assertEquals(new Position(0, 0), $this->board->getLastPosition());
-		$this->board->placeCounter(new Counter('X'), 0);
-		$this->assertEquals(new Position(0, 1), $this->board->getLastPosition());
+		$col = 0;
+		$this->board->placeCounter($this->counter, $col);
+		$this->assertEquals(new Position($col, 0), $this->board->getLastPosition());
+		$this->board->placeCounter($this->counter, $col);
+		$this->assertEquals(new Position($col, 1), $this->board->getLastPosition());
 	}
 
 	public function testBoardSpaceIsEmpty() {
-		$pos1 = new Position(0, 0);
+		$col = 0;
+		$pos1 = new Position($col, 0);
 		$this->assertTrue($this->board->positionIsEmpty($pos1));
-		$this->board->placeCounter(new Counter('X'), 0);
+		$this->board->placeCounter($this->counter, $col);
 		$this->assertFalse($this->board->positionIsEmpty($pos1));
 
-		$pos2 = new Position(0, 1);
-		$this->board->placeCounter(new Counter('X'), 0);
+		$pos2 = new Position($col, 1);
+		$this->board->placeCounter($this->counter, $col);
 		$this->assertFalse($this->board->positionIsEmpty($pos1));
 	}
 
 	public function testColumnIsNotFull() {
-		$this->assertFalse($this->board->columnIsFull(0));
-		$this->board->placeCounter(new Counter('X'), 0);
-		$this->assertFalse($this->board->columnIsFull(0));
-		$this->board->placeCounter(new Counter('X'), 0);
-		$this->assertTrue($this->board->columnIsFull(0));
+		$col = 0;
+		$this->assertFalse($this->board->columnIsFull($col));
+		$this->board->placeCounter($this->counter, $col);
+		$this->assertFalse($this->board->columnIsFull($col));
+		$this->board->placeCounter($this->counter, $col);
+		$this->assertTrue($this->board->columnIsFull($col));
 	}
 
-	public function testBoardIsFull() {
+ 	public function testBoardIsFull() {
 		$smallBoard = new Board(1, 1);
 		$this->assertFalse($smallBoard->isFull());
-		$smallBoard->placeCounter(new Counter('X'), 0);
+		$col = 0;
+		$smallBoard->placeCounter($this->counter, $col);
 		$this->assertTrue($smallBoard->isFull());
-	}
-
-	public function testCounterEquality() {
-		$c = new Counter('X');
-		$this->assertTrue($c->equals(new Counter('X')));
-		$this->assertFalse($c->equals(new Counter('O')));
 	}
 
 	/**
 	 * @expectedException InvalidPositionException
 	 */
 	public function testCounterOffLeftOfBoard() {
-		$this->board->placeCounter(new Counter('X'), -1);
+		$this->board->placeCounter($this->counter, -1);		
 	}
 
 	/**
 	 * @expectedException InvalidPositionException
 	 */
 	public function testCounterOffRightOfBoard() {
-		$this->board->placeCounter(new Counter('X'), 9);
+		$this->board->placeCounter($this->counter, 9);
 	}
 
 

@@ -13,13 +13,11 @@ class Game implements Observer, Observable {
 	protected $winChecker;
 	protected $observers = array();	
 	protected $message = '';
-	protected $hasWinner = False;
 	
 	public function __construct(Board $board, WinChecker $winChecker) {
 		$this->board = $board;
 		$this->winChecker = $winChecker;
 		$this->currentPlayerNumber = 0;
-		$this->hasWinner = False;
 	}
 	
 	public function addObserver(Observer $observer){
@@ -44,17 +42,12 @@ class Game implements Observer, Observable {
 		return $this->board;
 	}
 	
-	public function hasWinner(){
-		return $this->hasWinner;
-	}
-	
 	public function getMessage(){
 		return $this->message;
 	}	
 	
 	public function notify($data){		
 		$this->move($data);		
-		$this->notifyObservers($this);
 	}
 	
 	public function start(){
@@ -63,22 +56,39 @@ class Game implements Observer, Observable {
 	
 	public function move($col) {
 		try{
-			$currentPlayer = $this->getCurrentPlayer();
-			$counter = $currentPlayer->getCounter();
-			$this->board->placeCounter($counter, $col);
-			
-			$lastPosition = $this->board->getLastPosition();
-			if($this->winChecker->hasWin($lastPosition)){ //overflow of column, full board
-				$this->hasWinner = True;
-				throw new FourInARowException("Player {$this->currentPlayer} Wins!");
-			}
+			$this->board->placeCounter($this->getPlayersCounter(), $col);			
+			$this->checkBoardState();
 			$this->changePlayer();
-		}catch(FourInARowException $e){
+			$this->message = '';
+			$this->notifyObservers($this);
+		}catch(GameFinishedException $e){
 			$this->message = $e->getMessage();
+			$this->notifyObservers($this);
+			throw new GameOverException("The game has ended.");
+		}catch(GameplayException $e){
+			$this->message = $e->getMessage();
+			$this->notifyObservers($this);
+		}
+	}
+	
+	protected function getPlayersCounter(){
+		$currentPlayer = $this->getCurrentPlayer();
+		return $currentPlayer->getCounter();
+	}
+	
+	protected function checkBoardState(){
+		$lastPosition = $this->board->getLastPosition();
+		if( $this->winChecker->hasWin($lastPosition) ){
+			$winner = $this->getCurrentPlayer();
+			$winnersName = $winner->getName();
+			throw new GameWonException("{$winnersName} Wins!");
+		}
+		if( $this->board->isFull() ){
+			throw new GameDrawnException("It's a draw!");
 		}
 	}
 
-	public function changePlayer() {
+	protected function changePlayer() {
 		if (++$this->currentPlayerNumber >= count($this->players)) {
 			$this->currentPlayerNumber = 0;
 		}
