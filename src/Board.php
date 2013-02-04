@@ -70,7 +70,7 @@ class Board {
 			if ($this->positionIsEmpty($pos)) {
 				$this->cells[$pos->col][$pos->row] = $counter;
 				$this->lastPosition = $pos;
-				return;
+				break;
 			}
 		}
 	}

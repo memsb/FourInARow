@@ -35,12 +35,10 @@ class WinCheckerTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	public function testWinningDiagonal() {
-		$pos = new Position(3, 4);
-		$board = $this->getMockBoardWithCounters(4, $this->getMockEqualCounter());		
-		$this->assertTrue($this->checker->hasWinInDiagonal($board, $pos));
+		$pos = new Position(3, 3);
+		$this->assertTrue($this->checker->hasWinInDiagonal($this->getMockBoardWithCounters(8, $this->getMockEqualCounter()), $pos));
 	}
 	
-	/**
 	public function testNonWinningDiagonal() {
 		$pos = new Position(0, 0);
 		$this->assertFalse($this->checker->hasWinInDiagonal($this->getMockBoardWithCounters(0, $this->getMockEqualCounter()), $pos));
@@ -61,16 +59,10 @@ class WinCheckerTest extends PHPUnit_Framework_TestCase {
 		$this->assertFalse($this->checker->hasWin($this->getMockBoardWithCounters(3, $this->getMockEqualCounter()), $pos));
 		$this->assertFalse($this->checker->hasWin($this->getMockBoardWithCounters(4, $this->getMockUnequalCounter()), $pos));
 	}
-		 * 
-	 */
+		
 	protected function getMockBoardWithCounters($numOfCounters, $counter){
-		$board = $this->getMock('Board', array('getCell', 'getWidth', 'getHeight'), array($this->cols, $this->rows));
-		$board->expects($this->any())
-				->method('getWidth')
-				->will($this->returnValue($this->cols));
-		$board->expects($this->any())
-				->method('getHeight')
-				->will($this->returnValue($this->rows));
+		$board = $this->getMock('Board', array('getCell'), array($this->cols, $this->rows));
+		
 		for($i = 0; $i < $numOfCounters; $i++){
 			$board->expects($this->at($i))
 					->method('getCell')

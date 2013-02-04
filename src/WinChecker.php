@@ -39,21 +39,18 @@ class WinChecker {
 	public function hasWinInDiagonal(Board $board, $pos){
 		$this->board = $board;		
 		$diag1 = $this->getDiagonalDownRight($pos);
-		return False;
-		//$diag2 = $this->getDiagonalDownLeft($pos);
-		return $this->checkPositionsForWin($diag1);// OR $this->checkPositionsForWin($diag2);
+		$diag2 = $this->getDiagonalDownLeft($pos);
+		return $this->checkPositionsForWin($diag1) OR $this->checkPositionsForWin($diag2);
 	}
 	
 	protected function getDiagonalDownRight($pos){		
-		$currentPos = new Position(0, 5);//$this->getMostUpperLeft($pos);
+		$currentPos = $this->getMostUpperLeft($pos);
 		$cells = array();
-		while($currentPos->row > 0 && $currentPos->col < 6){
-			var_dump($this->board->getCell($pos));
+		while($currentPos->row > 0 && $currentPos->col < $this->board->getWidth()){
 			$currentPos->row--;
 			$currentPos->col++;
-			//$cells[] = 1;//$this->board->getCell($currentPos);
+			$cells[] = $this->board->getCell($currentPos);
 		}
-		die();
 		return $cells;
 	}
 	
