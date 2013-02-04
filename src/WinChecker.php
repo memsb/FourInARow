@@ -8,25 +8,27 @@ class WinChecker {
 	private $inARow = 0;
 	private $board;
 
-	function __construct(Board $board, $inARow = 4) {
-		$this->board = $board;
+	function __construct($inARow = 4) {
 		$this->inARow = $inARow;
 	}	
 	
-	public function hasWin(Position $pos){
-		return $this->hasWinInColumn($pos->col) OR $this->hasWinInRow($pos->row) OR $this->hasWinInDiagonal($pos);
+	public function hasWin(Board $board, Position $pos){
+		return $this->hasWinInColumn($board, $pos->col) OR $this->hasWinInRow($board, $pos->row) OR $this->hasWinInDiagonal($board, $pos);
 	}
 	
-	public function hasWinInColumn($col){
+	public function hasWinInColumn(Board $board, $col){
+		$this->board = $board;
 		$cells = array();
 		foreach(range(0, $this->board->getHeight()) as $row){
 			$pos = new Position($col, $row);
 			$cells[] = $this->board->getCell($pos);
 		}
+		var_dump($this->board);
 		return $this->checkPositionsForWin($cells);
 	}
 	
-	public function hasWinInRow($row){
+	public function hasWinInRow(Board $board, $row){
+		$this->board = $board;
 		$cells = array();
 		foreach(range(0, $this->board->getWidth()) as $col){
 			$pos = new Position($col, $row);
@@ -35,7 +37,8 @@ class WinChecker {
 		return $this->checkPositionsForWin($cells);
 	}
 	
-	public function hasWinInDiagonal($pos){
+	public function hasWinInDiagonal(Board $board, $pos){
+		$this->board = $board;
 		$diag1 = $this->getDiagonalDownRight($pos, 'up');
 		$diag2 = $this->getDiagonalDownLeft($pos, 'down');
 		return $this->checkPositionsForWin($diag1) OR $this->checkPositionsForWin($diag2);

@@ -11,11 +11,15 @@ class Board {
 	private $lastPosition;
 
 	function __construct($cols, $rows) {
+		$this->checkBoardSizeIsValid($cols, $rows);
+		$this->cols = $cols;
+		$this->rows = $rows;
+	}
+	
+	protected function checkBoardSizeIsValid($cols, $rows){
 		if ($cols < 1 || $rows < 1) {
 			throw new InvalidBoardSizeException('Board width or height cannot be zero or less');
 		}
-		$this->cols = $cols;
-		$this->rows = $rows;
 	}
 	
 	public function getLastPosition(){
@@ -117,24 +121,6 @@ class Board {
 
 	protected function isValidPosition($col) {
 		return $col >= $this->getLeftColumn() && $col <= $this->getRightColumn();
-	}
-
-	public function __toString() {		
-		$string = PHP_EOL;
-		foreach ($this->getRowsFromTopDown() AS $row) {
-			foreach ($this->getColumnsFromLeftToRight() AS $col) {
-				$pos = new Position($col, $row);
-				try{
-					$counter = $this->getCell($pos);
-					$char = $counter->char;					
-				}catch(NoCounterException $e){
-					$char = ' ';
-				}
-				$string .= $char;
-			}
-			$string .= PHP_EOL;
-		}
-		return $string;
 	}
 
 }

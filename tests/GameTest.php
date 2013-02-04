@@ -9,19 +9,42 @@ class GameTest extends PHPUnit_Framework_TestCase {
 	protected $inARow = 3;
 
 	protected $game;
+	protected $board;
+	protected $checker;
 	protected $player1;
 	protected $player2;
 
 	protected function setup() {
-		$board = new Board($this->cols, $this->rows);	
-		$checker = new WinChecker($board, $this->inARow);
-				 
-		$this->player1 = new Player('player 1', new Counter('X'));
-		$this->player2 = new Player('player 1', new Counter('O'));				 
-				 
-		$this->game = new Game($board, $checker);		
+		$this->board = $this->getDummyBoard(); 
+		$this->checker = $this->getDummyChecker();
+		$this->game = new Game($this->board, $this->checker);
+		$this->player1 = $this->getDummyPlayer();
 		$this->game->addPlayer($this->player1);
+		$this->player2 = $this->getDummyPlayer();
 		$this->game->addPlayer($this->player2);
+	}
+	
+	protected function getDummyBoard(){
+		return $this->getMock('Board', array(), array($this->cols, $this->rows));	
+	}
+	
+	protected function getDummyChecker(){
+		return $this->getMock('WinChecker', array(), array($this->inARow));
+	}
+	
+	protected function getDummyPlayer(){
+		return $this->getMock('Player', array(), array('Player', $this->getDummyCounter()));
+	}
+	
+	protected function getDummyCounter(){
+		return $this->getMock('Counter', array(), array(''));
+	}
+	
+	protected function getObserverThatExpectsToBeCalled(){
+		$observer = $this->getMock('Observer', array('notify'));
+		$observer->expects($this->once())
+                 ->method('notify');
+		return $observer;
 	}
 
 	public function testGetBoard(){
@@ -33,80 +56,110 @@ class GameTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testMakingAMoveChangesPlayer() {
+		$this->board->expects($this->any())
+			->method('getLastPosition')
+			->will($this->returnValue(new Position(0, 0)));
 		$this->assertEquals($this->player1, $this->game->getCurrentPlayer());
 		$this->game->move(0);
 		$this->assertEquals($this->player2, $this->game->getCurrentPlayer());
 		$this->game->move(0);
 		$this->assertEquals($this->player1, $this->game->getCurrentPlayer());
 	}
-	
-	public function testIllegalMoveDoesntChangePlayer() {
+
+	public function testIllegalMoveDoesntChangePlayer() {		
+		$this->board->expects($this->any())
+			->method('placeCounter')
+			->will($this->throwException(new InvalidPositionException()));
 		$this->assertEquals($this->player1, $this->game->getCurrentPlayer());
 		$this->game->move(-1);
 		$this->assertEquals($this->player1, $this->game->getCurrentPlayer());
 	}
 	
+	public function testNotifyingObserverMakesAMove(){
+		$this->board->expects($this->any())
+			->method('getLastPosition')
+			->will($this->returnValue(new Position(0, 0)));
+		$this->board->expects($this->once())
+			->method('placeCounter');
+		$this->game->notify(0);
+	}
+	
+		
 	public function testMakingAMoveNotifiesObservers(){
-		$observer = $this->getMock('Observer', array('notify'));
-		$observer->expects($this->once())
-                 ->method('notify');
-		$this->game->addObserver($observer);
+		$this->board->expects($this->any())
+			->method('getLastPosition')
+			->will($this->returnValue(new Position(0, 0)));
+			
+		$this->game->addObserver($this->getObserverThatExpectsToBeCalled());
 		$this->game->move(0);
 	}	
-	
-	public function testStartingAGameNotifiesObservers(){
-		$observer = $this->getMock('Observer', array('notify'));
-		$observer->expects($this->once())
-                 ->method('notify');
-		$this->game->addObserver($observer);
+
+	public function testStartingAGameNotifiesObservers(){		
+		$this->board->expects($this->any())
+			->method('getLastPosition')
+			->will($this->returnValue(new Position(0, 0)));
+		
+		$this->game->addObserver($this->getObserverThatExpectsToBeCalled());
 		$this->game->start();
 	}
-	
+
 	public function testInvalidMoveSetsMessage(){
-		$this->assertEmpty($this->game->getMessage());
+		$this->board->expects($this->any())
+			->method('getLastPosition')
+			->will($this->returnValue(new Position(0, 0)));
+			
+		$msg = 'test';
+		$this->board->expects($this->at(0))
+			->method('placeCounter')
+			->will($this->throwException(new InvalidPositionException($msg)));
+			
+		$this->assertEquals('', $this->game->getMessage());
 		$this->game->move(-1);
-		$this->assertNotEmpty($this->game->getMessage());
+		$this->assertEquals($msg, $this->game->getMessage());
 		$this->game->move(0);
-		$this->assertEmpty($this->game->getMessage());
+		$this->assertEquals('', $this->game->getMessage());
+	}
+
+	public function testFullColumnSetsMessage(){
+		$this->board->expects($this->any())
+			->method('getLastPosition')
+			->will($this->returnValue(new Position(0, 0)));
+		
+		$msg = 'test';
+		$this->board->expects($this->at(0))
+			->method('placeCounter')
+			->will($this->throwException(new InvalidPositionException($msg)));			
+		
+		$this->assertEquals('', $this->game->getMessage());
+		$this->game->move(0);
+		$this->assertEquals($msg, $this->game->getMessage());
 	}
 	
-	public function testFullColumnSetsMessage(){
-		$this->assertEmpty($this->game->getMessage());
-		$this->game->move(0);
-		$this->game->move(0);
-		$this->game->move(0);
-		$this->game->move(0);
-		$this->assertNotEmpty($this->game->getMessage());
-	}
-		
 	/**
 	 * @expectedException GameOverException 
 	 */
 	public function testFullBoardEndsGame(){
-		$this->assertEmpty($this->game->getMessage());
-		for($col = 0; $col < $this->cols; $col++){
-			for($row = 0; $row < $this->rows; $row++){
-				$this->game->move($col);
-			}
-		}
+		$this->board->expects($this->any())
+			->method('getLastPosition')
+			->will($this->returnValue(new Position(0, 0)));
+		$this->board->expects($this->any())
+			->method('isFull')
+			->will($this->returnValue(True));
+			
+		$this->game->move(0);
 	}
 	
 	/**
 	 * @expectedException GameOverException 
 	 */
 	public function testGameWithWin() {
-		$this->game->move(0);
-		$this->game->move(1);
-		$this->game->move(0);
-		$this->game->move(1);
-		$this->game->move(0);
-	}
-
-	public function testGameWithoutWin() {
-		$this->game->move(0);
-		$this->game->move(0);
+		$this->board->expects($this->any())
+			->method('getLastPosition')
+			->will($this->returnValue(new Position(0, 0)));
+		$this->checker->expects($this->any())
+			->method('hasWin')
+			->will($this->returnValue(True));
 		$this->game->move(0);
 	}
-
 }
 ?>

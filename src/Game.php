@@ -61,10 +61,10 @@ class Game implements Observer, Observable {
 			$this->changePlayer();
 			$this->message = '';
 			$this->notifyObservers($this);
-		}catch(GameFinishedException $e){
+		}catch(GameOverException $e){
 			$this->message = $e->getMessage();
 			$this->notifyObservers($this);
-			throw new GameOverException("The game has ended.");
+			throw $e;
 		}catch(GameplayException $e){
 			$this->message = $e->getMessage();
 			$this->notifyObservers($this);
@@ -78,7 +78,7 @@ class Game implements Observer, Observable {
 	
 	protected function checkBoardState(){
 		$lastPosition = $this->board->getLastPosition();
-		if( $this->winChecker->hasWin($lastPosition) ){
+		if( $this->winChecker->hasWin($this->board, $lastPosition) ){
 			$winner = $this->getCurrentPlayer();
 			$winnersName = $winner->getName();
 			throw new GameWonException("{$winnersName} Wins!");

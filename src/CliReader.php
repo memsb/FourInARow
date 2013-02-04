@@ -47,9 +47,14 @@ class CliReader implements Observable {
 		return $input;
 	}
 	
-	protected function readFromCli(){
+	/**
+	 * Function contents is untestable and has been isolated to be mocked.
+	 * @codeCoverageIgnoreStart
+	 */ 
+	protected function readFromCli(){            
 		return trim(fread(STDIN, 4));
 	}
+	// @codeCoverageIgnoreEnd
 }
 
 ?>

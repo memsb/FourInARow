@@ -48,13 +48,17 @@ class BoardTest extends PHPUnit_Framework_TestCase {
 		$this->assertFalse($this->board->positionIsEmpty($pos1));
 	}
 
-	public function testColumnIsNotFull() {
+	/**
+	 * @expectedException InvalidPositionException
+	 */
+	public function testColumnIsFull() {
 		$col = 0;
 		$this->assertFalse($this->board->columnIsFull($col));
 		$this->board->placeCounter($this->counter, $col);
 		$this->assertFalse($this->board->columnIsFull($col));
 		$this->board->placeCounter($this->counter, $col);
 		$this->assertTrue($this->board->columnIsFull($col));
+		$this->board->placeCounter($this->counter, $col);
 	}
 
  	public function testBoardIsFull() {

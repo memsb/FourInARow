@@ -12,15 +12,13 @@ class InvalidPositionException extends GameplayException{}
 
 class NoCounterException extends GameplayException{}
 
-class BoardIsFullException extends GameplayException{}
-
 class GameOverException extends FourInARowException{}
 
-class GameFinishedException extends FourInARowException{}
+class BoardIsFullException extends GameOverException{}
 
-class GameWonException extends GameFinishedException{}
+class GameWonException extends GameOverException{}
 
-class GameDrawnException extends GameFinishedException{}
+class GameDrawnException extends GameOverException{}
 
 
 ?>
