@@ -17,7 +17,7 @@ class WinCheckerTest extends PHPUnit_Framework_TestCase {
 	public function testWinningColumn() {
 		$this->assertTrue($this->checker->hasWinInColumn($this->getMockBoardWithCounters(4, $this->getMockEqualCounter()), 0));
 	}
-	/*
+	
 	public function testNonWinningcolumn(){
 		$this->assertFalse($this->checker->hasWinInColumn($this->getMockBoardWithCounters(0, $this->getMockEqualCounter()), 0));
 		$this->assertFalse($this->checker->hasWinInColumn($this->getMockBoardWithCounters(3, $this->getMockEqualCounter()), 0));
@@ -36,7 +36,7 @@ class WinCheckerTest extends PHPUnit_Framework_TestCase {
 	
 	public function testWinningDiagonal() {
 		$pos = new Position(3, 4);
-		$board = $this->getMockBoardWithCounters(4, $this->getMockEqualCounter());
+		$board = $this->getMockBoardWithCounters(4, $this->getMockEqualCounter());		
 		$this->assertTrue($this->checker->hasWinInDiagonal($board, $pos));
 	}
 	

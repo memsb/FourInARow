@@ -15,7 +15,7 @@ class GameTest extends PHPUnit_Framework_TestCase {
 	protected $player2;
 
 	protected function setup() {
-		$this->board = $this->getDummyBoard(); 
+		$this->board = $this->getMockBoard(); 
 		$this->checker = $this->getDummyChecker();
 		$this->game = new Game($this->board, $this->checker);
 		$this->player1 = $this->getDummyPlayer();
@@ -24,8 +24,12 @@ class GameTest extends PHPUnit_Framework_TestCase {
 		$this->game->addPlayer($this->player2);
 	}
 	
-	protected function getDummyBoard(){
-		return $this->getMock('Board', array(), array($this->cols, $this->rows));	
+	protected function getMockBoard(){
+		$board = $this->getMock('Board', array(), array($this->cols, $this->rows));
+		$board->expects($this->any())
+			->method('getLastPosition')
+			->will($this->returnValue(new Position(0, 0)));
+		return $board;
 	}
 	
 	protected function getDummyChecker(){
@@ -56,9 +60,6 @@ class GameTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testMakingAMoveChangesPlayer() {
-		$this->board->expects($this->any())
-			->method('getLastPosition')
-			->will($this->returnValue(new Position(0, 0)));
 		$this->assertEquals($this->player1, $this->game->getCurrentPlayer());
 		$this->game->move(0);
 		$this->assertEquals($this->player2, $this->game->getCurrentPlayer());
@@ -76,38 +77,23 @@ class GameTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	public function testNotifyingObserverMakesAMove(){
-		$this->board->expects($this->any())
-			->method('getLastPosition')
-			->will($this->returnValue(new Position(0, 0)));
 		$this->board->expects($this->once())
 			->method('placeCounter');
 		$this->game->notify(0);
 	}
 	
 		
-	public function testMakingAMoveNotifiesObservers(){
-		$this->board->expects($this->any())
-			->method('getLastPosition')
-			->will($this->returnValue(new Position(0, 0)));
-			
+	public function testMakingAMoveNotifiesObservers(){			
 		$this->game->addObserver($this->getObserverThatExpectsToBeCalled());
 		$this->game->move(0);
 	}	
 
 	public function testStartingAGameNotifiesObservers(){		
-		$this->board->expects($this->any())
-			->method('getLastPosition')
-			->will($this->returnValue(new Position(0, 0)));
-		
 		$this->game->addObserver($this->getObserverThatExpectsToBeCalled());
 		$this->game->start();
 	}
 
 	public function testInvalidMoveSetsMessage(){
-		$this->board->expects($this->any())
-			->method('getLastPosition')
-			->will($this->returnValue(new Position(0, 0)));
-			
 		$msg = 'test';
 		$this->board->expects($this->at(0))
 			->method('placeCounter')
@@ -120,11 +106,7 @@ class GameTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('', $this->game->getMessage());
 	}
 
-	public function testFullColumnSetsMessage(){
-		$this->board->expects($this->any())
-			->method('getLastPosition')
-			->will($this->returnValue(new Position(0, 0)));
-		
+	public function testFullColumnSetsMessage(){		
 		$msg = 'test';
 		$this->board->expects($this->at(0))
 			->method('placeCounter')
@@ -140,9 +122,6 @@ class GameTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testFullBoardEndsGame(){
 		$this->board->expects($this->any())
-			->method('getLastPosition')
-			->will($this->returnValue(new Position(0, 0)));
-		$this->board->expects($this->any())
 			->method('isFull')
 			->will($this->returnValue(True));
 			
@@ -153,9 +132,6 @@ class GameTest extends PHPUnit_Framework_TestCase {
 	 * @expectedException GameOverException 
 	 */
 	public function testGameWithWin() {
-		$this->board->expects($this->any())
-			->method('getLastPosition')
-			->will($this->returnValue(new Position(0, 0)));
 		$this->checker->expects($this->any())
 			->method('hasWin')
 			->will($this->returnValue(True));

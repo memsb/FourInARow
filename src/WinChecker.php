@@ -17,20 +17,19 @@ class WinChecker {
 	}
 	
 	public function hasWinInColumn(Board $board, $col){
-		$this->board = $board;
+		$this->board = $board;		
 		$cells = array();
-		foreach(range(0, $this->board->getHeight()) as $row){
+		foreach($this->board->getRowsFromBottomUp() as $row){
 			$pos = new Position($col, $row);
 			$cells[] = $this->board->getCell($pos);
 		}
-		var_dump($this->board);
 		return $this->checkPositionsForWin($cells);
 	}
 	
 	public function hasWinInRow(Board $board, $row){
 		$this->board = $board;
 		$cells = array();
-		foreach(range(0, $this->board->getWidth()) as $col){
+		foreach($this->board->getColumnsFromLeftToRight() as $col){
 			$pos = new Position($col, $row);
 			$cells[] = $this->board->getCell($pos);
 		}
@@ -38,20 +37,23 @@ class WinChecker {
 	}
 	
 	public function hasWinInDiagonal(Board $board, $pos){
-		$this->board = $board;
-		$diag1 = $this->getDiagonalDownRight($pos, 'up');
-		$diag2 = $this->getDiagonalDownLeft($pos, 'down');
-		return $this->checkPositionsForWin($diag1) OR $this->checkPositionsForWin($diag2);
+		$this->board = $board;		
+		$diag1 = $this->getDiagonalDownRight($pos);
+		return False;
+		//$diag2 = $this->getDiagonalDownLeft($pos);
+		return $this->checkPositionsForWin($diag1);// OR $this->checkPositionsForWin($diag2);
 	}
 	
-	protected function getDiagonalDownRight($pos){
-		$currentPos = $this->getMostUpperLeft($pos);		
+	protected function getDiagonalDownRight($pos){		
+		$currentPos = new Position(0, 5);//$this->getMostUpperLeft($pos);
 		$cells = array();
-		while($currentPos->row > 0 && $currentPos->col < $this->board->getWidth()){
+		while($currentPos->row > 0 && $currentPos->col < 6){
+			var_dump($this->board->getCell($pos));
 			$currentPos->row--;
 			$currentPos->col++;
-			$cells[] = $this->board->getCell($currentPos);
+			//$cells[] = 1;//$this->board->getCell($currentPos);
 		}
+		die();
 		return $cells;
 	}
 	
