@@ -1,1 +1,0 @@
-ALIAS phpunit="phpunit --colors"
